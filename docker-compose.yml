@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  python-user-insights:
+    build: ./python-user-insights
+    container_name: user-insights-api
+    ports:
+      - "5001:5001"
+    environment:
+      - CONFIG_PATH=/app/config.yaml
+      - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}  # Use env variable for security
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+    volumes:
+      - ./python-user-insights/config.yaml:/app/config.yaml
+      - ./python-user-insights/logs:/var/log/user-insights
+    depends_on:
+      - postgres
+    networks:
+      - external_services_network
+
+  go-image-processing:
+    build: ./go-image-processing
+    container_name: image-processing-api
+    ports:
+      - "8080:8080"
+    environment:
+      - CONFIG_PATH=/app/config.yaml
+    volumes:
+      - ./go-image-processing/config.yaml:/app/config.yaml
+      - ./go-image-processing/uploads:/tmp  # Share uploads directory
+    depends_on:
+      - python-user-insights
+    networks:
+      - external_services_network
+
+  postgres:
+    image: postgres:14
+    container_name: user-insights-db
+    restart: always
+    environment:
+      POSTGRES_USER: techstories
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: analytics
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - external_services_network
+
+networks:
+  external_services_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

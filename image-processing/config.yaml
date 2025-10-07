@@ -1,0 +1,23 @@
+server:
+  port: 8080
+  bind_address: "0.0.0.0"  # Binding to all interfaces (matches the code)
+
+storage:
+  upload_dir: "/tmp"  # Temporary storage for user uploads
+  max_file_size_mb: 5  # Maximum allowed image upload size
+
+image_processing:
+  allowed_transformations:
+    - "grayscale"
+    - "resize"
+    - "rotate"
+  ai_moderation_api: "http://external-ai-service.com/api/moderate"  # External AI analysis API
+
+security:
+  grpc_ai_service: "ai-analysis-service:50051"  # AI moderation gRPC service
+  grpc_insecure: true  # No TLS for gRPC connections
+  allow_external_requests: true  # Allow fetching images from external URLs
+
+logging:
+  level: "info"  # Logging level (debug, info, warn, error)
+  log_file: "/var/log/image-processing.log"  # Log output file
